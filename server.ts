@@ -9,7 +9,6 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 
 const app = express();
-const PORT = 3000;
 const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -269,23 +268,29 @@ app.put("/api/site-settings/:id", authenticateToken, async (req, res) => {
   res.json(updated);
 });
 
-// --- Vite Middleware ---
+// --- Frontend Serving ---
 
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
+  if (process.env.NODE_ENV === "production") {
+    // Production: serve built frontend
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
+  } else {
+    // Development: use Vite middleware
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(process.cwd(), 'index.html'));
+    });
   }
 
+  const PORT = process.env.PORT || 3000;
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });

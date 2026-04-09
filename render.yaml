@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: vivek-portfolio-backend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        scope: all
+      - key: JWT_SECRET
+        scope: all
+      - key: ADMIN_USERNAME
+        scope: all
+      - key: ADMIN_PASSWORD
+        scope: all
+      - key: GEMINI_API_KEY
+        scope: all
+      - key: APP_URL
+        scope: all
