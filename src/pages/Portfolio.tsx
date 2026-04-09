@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "@/api/axiosConfig";
 import { 
   Github, 
   Linkedin, 
@@ -71,6 +72,7 @@ interface SiteSettings {
 }
 
 export default function Portfolio() {
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experience, setExperience] = useState<Experience[]>([]);
@@ -83,11 +85,11 @@ export default function Portfolio() {
     const fetchData = async () => {
       try {
         const [settingsRes, skillsRes, expRes, projRes, eduRes] = await Promise.all([
-          axios.get("/api/site-settings"),
-          axios.get("/api/skills"),
-          axios.get("/api/experience"),
-          axios.get("/api/projects"),
-          axios.get("/api/education"),
+          axiosInstance.get("/api/site-settings"),
+          axiosInstance.get("/api/skills"),
+          axiosInstance.get("/api/experience"),
+          axiosInstance.get("/api/projects"),
+          axiosInstance.get("/api/education"),
         ]);
         setSettings(settingsRes.data);
         setSkills(skillsRes.data);
@@ -142,6 +144,9 @@ export default function Portfolio() {
           </ul>
 
           <div className="flex items-center gap-4">
+            <Button onClick={() => navigate("/login")} className="bg-blue-600 hover:bg-blue-700">
+              Admin Login
+            </Button>
             <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
@@ -169,6 +174,14 @@ export default function Portfolio() {
                   </button>
                 </li>
               ))}
+              <li>
+                <Button 
+                  onClick={() => navigate("/login")} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 mt-2"
+                >
+                  Admin Login
+                </Button>
+              </li>
             </ul>
           </motion.div>
         )}
