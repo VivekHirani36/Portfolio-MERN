@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "@/api/axiosConfig";
 import { 
   Plus, 
   Trash2, 
@@ -46,9 +46,6 @@ export default function AdminDashboard() {
   const [siteSettings, setSiteSettings] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const config = { headers: { Authorization: `Bearer ${token}` } };
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -56,11 +53,11 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const [settingsRes, s, ex, p, ed] = await Promise.all([
-        axios.get("/api/site-settings"),
-        axios.get("/api/skills"),
-        axios.get("/api/experience"),
-        axios.get("/api/projects"),
-        axios.get("/api/education"),
+        axiosInstance.get("/api/site-settings"),
+        axiosInstance.get("/api/skills"),
+        axiosInstance.get("/api/experience"),
+        axiosInstance.get("/api/projects"),
+        axiosInstance.get("/api/education"),
       ]);
       setSiteSettings(settingsRes.data);
       setSkills(s.data);
@@ -80,7 +77,7 @@ export default function AdminDashboard() {
   const deleteItem = async (type: string, id: string) => {
     if (!confirm("Are you sure you want to delete this item?")) return;
     try {
-      await axios.delete(`/api/${type}/${id}`, config);
+      await axiosInstance.delete(`/api/${type}/${id}`);
       toast.success("Deleted successfully");
       fetchData();
     } catch (error) {
@@ -226,10 +223,10 @@ function SectionManager({ title, items, type, onUpdate, config, fields, deleteIt
 
     try {
       if (editingItem) {
-        await axios.put(`/api/${type}/${editingItem._id}`, data, config);
+        await axiosInstance.put(`/api/${type}/${editingItem._id}`, data);
         toast.success("Updated successfully");
       } else {
-        await axios.post(`/api/${type}`, data, config);
+        await axiosInstance.post(`/api/${type}`, data);
         toast.success("Added successfully");
       }
       setIsOpen(false);
@@ -363,9 +360,8 @@ function SiteSettingsForm({ settings, onUpdate, config }: any) {
     try {
       const fileData = new FormData();
       fileData.append("resume", resumeFile);
-      const res = await axios.post("/api/upload-resume", fileData, {
+      const res = await axiosInstance.post("/api/upload-resume", fileData, {
         headers: {
-          Authorization: config.headers.Authorization,
           "Content-Type": "multipart/form-data",
         },
       });
@@ -389,7 +385,7 @@ function SiteSettingsForm({ settings, onUpdate, config }: any) {
     };
 
     try {
-      await axios.put(`/api/site-settings/${settings._id}`, payload, config);
+      await axiosInstance.put(`/api/site-settings/${settings._id}`, payload);
       toast.success("Site settings updated");
       onUpdate();
     } catch (error) {
